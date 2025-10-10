@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessReplicator - Usuários e Perfis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Sistema de Notificações -->
+    <div id="sistemaNotificacoes" class="sistema-notificacoes"></div>
+
+    <div class="header">
+        <h1><i class="fas fa-copy"></i> AccessReplicator</h1>
+        <p>Sistema de criação de usuários e perfis</p>
+    </div>
+
+    <!-- Abas -->
+    <div class="tabs">
+        <div class="tab active" data-target="usuario-form">Usuário</div>
+        <div class="tab" data-target="perfil-form">Perfil</div>
+        <div class="tab" data-target="inativar-form">Inativar Usuário</div>
+    </div>
+
+    <!-- ================= FORMULÁRIO DE CRIAÇÃO DE USUÁRIO ================= -->
+    <div class="form-container active" id="usuario-form">
+        <h2><i class="fas fa-user-plus"></i> Criação de Usuário</h2>
+        <div class="form-group">
+            <label for="usuario_origem" class="required">Usuário Base (Espelho)</label>
+            <div class="input-icon">
+                <i class="fas fa-user"></i>
+                <input type="text" id="usuario_origem" name="usuario_origem" placeholder="Usuário espelho" maxlength="10" oninput="this.value = this.value.toUpperCase()">
+            </div>
+            <div class="error-text" id="usuario_origem_error"></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="usuario_destino" class="required">Novo Usuário</label>
+                <div class="input-icon">
+                    <i class="fas fa-user-circle"></i>
+                    <input type="text" id="usuario_destino" name="usuario_destino" 
+                           placeholder="Digite o nome do novo usuário" 
+                           maxlength="10" 
+                           oninput="this.value = this.value.toUpperCase()"
+                           title="Ao sair deste campo, será feita uma verificação em todas as bases">
+                </div>
+                <div class="loading-text" id="usuario_destino_loading" style="display: none;"></div>
+                <div class="error-text" id="usuario_destino_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="usuario_ad">Usuário AD</label>
+                <div class="input-icon">
+                    <i class="fas fa-users"></i>
+                    <input type="text" id="usuario_ad" name="usuario_ad" placeholder="Usuário AD">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="required">Selecionar Bases</label>
+            <div class="multiselect">
+                <div class="selectBox" onclick="toggleCheckboxes('usuario')">
+                    <span id="selectedBasesText">Selecionar Bases</span>
+                    <span class="selected-count" id="selectedCount">0</span>
+                </div>
+                <div id="checkboxes-usuario" class="checkboxes">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="selectAllUsuario" onchange="toggleAll('usuario')">
+                        <label for="selectAllUsuario">Selecionar Todas Disponíveis</label>
+                    </div>
+                    <div class="bases-container" id="bases-container">
+                        <!-- Checkboxes dinâmicos -->
+                    </div>
+                </div>
+            </div>
+            <div class="bases-controls" style="margin-top: 10px;">
+                <button type="button" onclick="selecionarTodasDisponiveis()" class="btn-control">
+                    <i class="fas fa-check-square"></i> Selecionar Todas Disponíveis
+                </button>
+                <button type="button" onclick="limparSelecaoBases()" class="btn-control">
+                    <i class="fas fa-times"></i> Limpar Seleção
+                </button>
+            </div>
+            <div class="error-text" id="bases_error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="nome_completo" class="required">Nome Completo</label>
+            <div class="input-icon">
+                <i class="fas fa-signature"></i>
+                <input type="text" id="nome_completo" name="nome_completo" placeholder="Nome completo" oninput="this.value = this.value.toUpperCase()">
+            </div>
+            <div class="error-text" id="nome_completo_error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="email_suporte" class="required">E-mail de Suporte</label>
+            <div class="input-icon">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email_suporte" name="email_suporte" placeholder="E-mail de suporte">
+            </div>
+            <div class="error-text" id="email_suporte_error"></div>
+        </div>
+
+        <button class="replicar-btn" id="criar-usuario">
+            <i class="fas fa-user-plus"></i> Criar Usuário
+        </button>
+
+        <div class="resultado" id="resultado-usuario"></div>
+    </div>
+
+    <!-- ================= FORMULÁRIO DE CRIAÇÃO DE PERFIL ================= -->
+    <div class="form-container" id="perfil-form">
+        <h2><i class="fas fa-id-card"></i> Criação de Perfil</h2>
+        <div class="form-section">
+            <h3><i class="fas fa-clone"></i> Replicar Perfil entre Bases</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="base_origem" class="required">Base Origem</label>
+                    <select id="base_origem" name="base_origem" class="base-select">
+                        <option value="">Selecionar Base Origem</option>
+                        <!-- Opções preenchidas via JavaScript -->
+                    </select>
+                    <div class="error-text" id="base_origem_error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="perfil_origem" class="required">Perfil Origem</label>
+                    <div class="input-icon">
+                        <i class="fas fa-id-badge"></i>
+                        <input type="text" id="perfil_origem" name="perfil_origem" placeholder="Nome do perfil origem" maxlength="10" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div class="error-text" id="perfil_origem_error"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required">Bases Destino</label>
+                <div class="multiselect">
+                    <div class="selectBox" onclick="toggleCheckboxes('perfil')">
+                        <span id="selectedBasesTextPerfil">Selecionar Bases Destino</span>
+                        <span class="selected-count" id="selectedCountPerfil">0</span>
+                    </div>
+                    <div id="checkboxes-perfil" class="checkboxes">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="selectAllPerfil" onchange="toggleAll('perfil')">
+                            <label for="selectAllPerfil">Selecionar Todas</label>
+                        </div>
+                        <div class="bases-container" id="bases-container-perfil">
+                            <!-- Checkboxes dinâmicos -->
+                        </div>
+                    </div>
+                </div>
+                <div class="error-text" id="bases_perfil_error"></div>
+            </div>
+
+            <button class="replicar-btn" id="criar-perfil">
+                <i class="fas fa-clone"></i> Replicar Perfil
+            </button>
+        </div>
+
+        <!-- ================= ALTERAÇÃO DE PERFIL ================= -->
+        <div class="form-section" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e9ecef;">
+            <h3><i class="fas fa-exchange-alt"></i> Alterar Perfil de Usuário</h3>
+            
+            <div class="form-group">
+                <label class="required">Bases</label>
+                <div class="contador-bases" id="contador-base-alteracao">Selecione uma base para alteração</div>
+                <div class="multiselect">
+                    <div class="selectBox" onclick="toggleCheckboxes('alteracao-perfil')">
+                        <span id="selectedBaseTextAlteracao">Filtro de bases</span>
+                        <span class="selected-count" id="selectedCountAlteracao">0</span>
+                    </div>
+                    <div id="checkboxes-alteracao-perfil" class="checkboxes">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="selectAllAlteracaoPerfil" onchange="toggleAll('alteracao-perfil')">
+                            <label for="selectAllAlteracaoPerfil">Selecionar Todas as Bases</label>
+                        </div>
+                        <div class="bases-container" id="bases-container-alteracao-perfil">
+                            <!-- Checkboxes dinâmicos -->
+                        </div>
+                    </div>
+                </div>
+                <div class="bases-controls" style="margin-top: 10px;">
+                    <button type="button" onclick="selecionarTodasBasesAlteracaoPerfil()" class="btn-control">
+                        <i class="fas fa-check"></i> Selecionar Todas
+                    </button>
+                    <button type="button" onclick="limparSelecaoBaseAlteracaoPerfil()" class="btn-control">
+                        <i class="fas fa-times"></i> Limpar Seleção
+                    </button>
+                </div>
+                <div class="error-text" id="base_alteracao_error"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="usuario_espelho_alteracao" class="required">Usuário Espelho</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user-check"></i>
+                        <input type="text" id="usuario_espelho_alteracao" name="usuario_espelho_alteracao" placeholder="Usuário com perfil desejado" maxlength="10" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div class="error-text" id="usuario_espelho_alteracao_error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="usuario_alterar" class="required">Usuário a Alterar</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user-edit"></i>
+                        <input type="text" id="usuario_alterar" name="usuario_alterar" placeholder="Usuário que terá perfil modificado" maxlength="10" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div class="error-text" id="usuario_alterar_error"></div>
+                </div>
+            </div>
+
+            <button class="replicar-btn btn-info" id="consultar-perfil">
+                <i class="fas fa-search"></i> Consultar Perfil
+            </button>
+
+            <div id="resultado-consulta" style="display: none; margin-top: 20px;">
+                <div class="form-group">
+                    <label>Detalhes da Alteração</label>
+                    <div class="perfil-info-card">
+                        <div class="perfil-comparacao">
+                            <div class="perfil-item"><strong>Base Selecionada:</strong> <span id="info-base-selecionada" class="perfil-destaque"></span></div>
+                            <div class="perfil-item"><strong>Usuário Espelho:</strong> <span id="info-usuario-espelho"></span></div>
+                            <div class="perfil-item"><strong>Perfil Atual (Espelho):</strong> <span id="info-perfil-espelho" class="perfil-destaque"></span></div>
+                            <div class="perfil-item"><strong>Usuário a Alterar:</strong> <span id="info-usuario-alterar"></span></div>
+                            <div class="perfil-item"><strong>Perfil Atual (Alterar):</strong> <span id="info-perfil-atual"></span></div>
+                            <div class="perfil-item alteracao"><strong>→ Novo Perfil:</strong> <span id="info-novo-perfil" class="perfil-novo"></span></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="replicar-btn btn-success" id="confirmar-alteracao">
+                    <i class="fas fa-check-circle"></i> Confirmar Alteração de Perfil
+                </button>
+            </div>
+        </div>
+
+        <div class="resultado" id="resultado-perfil"></div>
+    </div>
+
+<!-- Formulário de Inativação de Usuário Compacto -->
+<div class="form-container" id="inativar-form">
+    <h2><i class="fas fa-user-times"></i> Inativar / Ativar Usuário</h2>
+
+    <!-- Seleção de Bases -->
+    <div class="form-group">
+        <label>Bases:</label>
+        <div class="multiselect">
+            <div class="selectBox" onclick="toggleCheckboxes('inativacao')">
+                <span id="selectedBasesTextInativacao">Selecionar bases</span>
+                <span class="count-badge" id="selectedCountInativacao">0</span>
+                <div class="overSelect"></div>
+            </div>
+            <div id="checkboxes-inativacao" class="checkboxes">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="selectAllInativacao" onchange="toggleAll('inativacao')">
+                    <label for="selectAllInativacao">Selecionar Todas</label>
+                </div>
+                <div id="bases-container-inativacao"></div>
+            </div>
+        </div>
+        <div class="error-text" id="bases_inativacao_error"></div>
+    </div>
+
+    <!-- Usuário -->
+    <div class="form-group">
+        <label for="usuario_inativar" class="required">Usuário</label>
+        <div class="input-icon">
+            <i class="fas fa-user"></i>
+            <input type="text" id="usuario_inativar" name="usuario_inativar" 
+                   placeholder="Digite o nome do usuário" maxlength="10" 
+                   oninput="this.value = this.value.toUpperCase()">
+        </div>
+        <div class="error-text" id="usuario_inativar_error"></div>
+    </div>
+
+    <!-- Botão de busca -->
+    <button class="replicar-btn" id="buscar-usuario">
+        <i class="fas fa-search"></i> Buscar Usuário
+    </button>
+
+    <!-- Resultado da busca -->
+    <div id="resultado-busca" style="margin-top: 20px;">
+        <div id="usuario-cards-container"></div>
+    </div>
+
+    <!-- Botões de ação -->
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="replicar-btn btn-danger" style="flex: 1;" onclick="inativarEmTodasBases()">
+            <i class="fas fa-ban"></i> Inativar na base selecionada
+        </button>
+
+        <button class="replicar-btn btn-success" style="flex: 1;" onclick="ativarEmTodasBases()">
+            <i class="fas fa-user-check"></i> Ativar na base selecionada
+        </button>
+    </div>
+
+    <!-- Resultado geral -->
+    <div class="resultado" id="resultado-inativacao"></div>
+</div>
+
+
+    <!-- ================= MODAL DE LOADING ================= -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-sync fa-spin"></i> Processamento em andamento</h3>
+            <ul id="loadingLista"></ul>
+            <button class="replicar-btn" onclick="fecharModal()" style="margin-top: 15px;">
+                <i class="fas fa-times"></i> Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= LOGS EM TEMPO REAL ================= -->
+    <div id="log-container" style="position: fixed; top: 20px; right: 20px; width: 350px; max-height: 500px; overflow-y: auto; background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10000; display: none;">
+        <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: between; align-items: center;">
+            <h4 style="margin: 0;">Log do Sistema</h4>
+            <button onclick="fecharLogs()" style="background: none; border: none; cursor: pointer; color: #666;">✕</button>
+        </div>
+        <div id="logs-content" style="padding: 10px;"></div>
+    </div>
+
+    <!-- ================= TOASTS ================= -->
+    <div id="toast-container" style="position: fixed; top: 50px; right: 50px; z-index: 9999;"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
