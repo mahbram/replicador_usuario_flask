@@ -14,9 +14,7 @@ replicador_usuario_flask/
 ├── requirements.txt  # Dependências
 └── README.md         # Documentação
 
- Segurança
-O arquivo db.py (credenciais e IPs sensíveis) foi removido do repositório.
-O arquivo .env é ignorado pelo Git e deve ser configurado apenas localmente.
+
 Como executar
 1. Clone o repositório
 git clone https://github.com/mahbram/replicador_usuario_flask.git
