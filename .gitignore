@@ -1,0 +1,29 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask / Instance
+instance/
+*.db
+*.sqlite3
+
+# Environment
+.env
+.env.*
+*.backup
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# System
+.DS_Store
+Thumbs.db
