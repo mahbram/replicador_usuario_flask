@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessReplicator - Usuários e Perfis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.1/gsap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!--  Notificações -->
+    <div id="sistemaNotificacoes" class="sistema-notificacoes"></div>
+
+    <div class="header">
+        <h1 class="animate__animated animate__fadeInDown">Access Replicator 4.0</h1>
+        <p>Sistema de criação de usuários e perfis</p>
+    </div>
+
+    <div class="container">
+        <div class="login-card" id="loginCard">
+            <div class="brand-header" id="brandHeader">
+                <i class="fas fa-user-lock"></i>
+                <h1>Access Replicator 4.0</h1>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}" class="login-form" id="loginForm">
+                <div class="input-group" id="inputUser">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="usuario" placeholder="Usuário" required>
+                </div>
+
+                <div class="input-group" id="inputPass">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="senha" id="password" placeholder="Senha" required>
+                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">Entrar</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='login.js') }}"></script>
+</body>
+</html>

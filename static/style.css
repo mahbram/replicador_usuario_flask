@@ -440,7 +440,7 @@ input[type="text"]:focus, input[type="email"]:focus, select:focus {
 }
 
 .card-header span.status-inativo {
-    color: red;
+    color: rgb(182, 7, 7);
     font-weight: bold;
 }
 
@@ -1265,18 +1265,22 @@ input[type="checkbox"][name="bases"]:disabled + label {
     display: none;
 }
 
-/* Estilo para o card de informações do perfil */
+/* Card do perfil ajustado ao tamanho da tela */
 .perfil-info-card {
+    width: 100%;
+    max-width: 800px; /* impede que fique largo demais em telas grandes */
+    margin: 20px auto; /* centraliza */
     background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 8px;
-    padding: 20px;
-    margin: 15px 0;
+    padding: 16px 20px;
+    box-sizing: border-box;
 }
 
+/* Itens internos */
 .perfil-item {
-    margin: 10px 0;
-    padding: 8px 0;
+    margin: 8px 0;
+    padding: 6px 0;
     border-bottom: 1px solid #dee2e6;
 }
 
@@ -1293,15 +1297,27 @@ input[type="checkbox"][name="bases"]:disabled + label {
     font-weight: bold;
     color: #28a745;
     background: #e8f5e8;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
 }
 
 .perfil-item.alteracao {
     background: #f0f8ff;
-    padding: 10px;
+    padding: 8px;
     border-radius: 5px;
-    margin-top: 15px;
+    margin-top: 12px;
+}
+
+/* Responsividade para telas pequenas */
+@media (max-width: 600px) {
+    .perfil-info-card {
+        padding: 12px;
+        max-width: 95%;
+    }
+
+    .perfil-item {
+        font-size: 14px;
+    }
 }
 
 
@@ -1369,4 +1385,120 @@ input[type="checkbox"][name="bases"]:disabled + label {
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
+}
+.app-footer {
+    position: fixed;              /* Fixa o rodapé na parte inferior */
+    bottom: 0;
+    left: 0;
+    width: 100%;                  /* Ocupa toda a largura da tela */
+    background: #0d1b2a;          /* Fundo escuro elegante */
+    color: #ffffffcc;             /* Texto com leve transparência */
+    text-align: center;           /* Centraliza o texto */
+    font-size: 0.85rem;
+    padding: 10px 0;              /* Altura confortável */
+    font-family: 'Poppins', sans-serif;
+    border-top: 1px solid rgba(255, 255, 255, 0.08); /* Linha sutil de separação */
+    z-index: 100;                 /* Garante que fique acima de outros elementos */
+}
+
+.app-footer.show {
+    display: flex;                /* Permite centralizar o conteúdo facilmente */
+    justify-content: center;
+    align-items: center;
+}
+
+.app-footer .autor {
+    color: #00b4d8;               /* Azul moderno de destaque */
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.app-footer .autor:hover {
+    color: #90e0ef;               /* Efeito hover suave */
+}
+
+.app-footer i {
+    margin-left: 6px;
+    color: #00b4d8;
+    transition: transform 0.3s ease;
+}
+
+.app-footer .autor:hover i {
+    transform: translateY(-2px);  /* Ícone flutua levemente */
+}
+
+/* Modal da equipe */
+.team-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(7, 142, 226, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.team-modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 250px;
+    max-width: 400px;
+    font-family: 'Poppins', sans-serif;
+}
+.team-modal-content h3 {
+    margin-bottom: 15px;
+    color: #6610f2;
+}
+.team-modal-content ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+.team-modal-content ul li {
+    margin: 5px 0;
+    font-weight: 500;
+}
+.team-modal-content button {
+    background: #6610f2;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.team-modal-content button:hover {
+    background: #0d6efd;
+}
+
+
+
+/* Botão Sair fixo no canto inferior direito */
+.logout-btn {
+    position: fixed;
+    bottom: 12px;      /* distância do rodapé */
+    right: 20px;       /* distância da lateral direita */
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* leve sombra */
+    z-index: 1000;     /* garante que fique acima de outros elementos */
+    transition: all 0.2s ease;
+}
+
+.logout-btn i {
+    margin-right: 6px;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
 }

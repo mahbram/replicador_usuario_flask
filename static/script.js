@@ -150,6 +150,7 @@ function adicionarEventListeners() {
         { id: 'criar-perfil', funcao: criarPerfil },
         { id: 'buscar-usuario', funcao: buscarUsuario },
         { id: 'confirmar-inativacao', funcao: confirmarInativacao }
+     
     ];
     
     botoesConfig.forEach(botao => {
@@ -685,12 +686,7 @@ function buscarUsuario() {
                                 '<span class="status-inativo">INATIVO</span>'
                             }
                         </span></p>
-                        ${result.data.ativo ? 
-                            `<button class="btn-inativar-base" onclick="inativarBaseIndividual('${result.base}', '${usuario}')">
-                                <i class="fas fa-user-slash"></i> Inativar nesta base
-                            </button>` : 
-                            '<p class="usuario-inativo"><i class="fas fa-ban"></i> Usuário já inativo</p>'
-                        }
+                       
                     </div>
                 `;
             }
@@ -705,9 +701,7 @@ function buscarUsuario() {
             divInativarTodas.style.textAlign = "center";
             divInativarTodas.style.marginTop = "20px";
             divInativarTodas.innerHTML = `
-                <button class="btn-inativar-todas" onclick="inativarEmTodasBases()" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-users-slash"></i> Inativar em TODAS as bases selecionadas (${basesAtivas.length})
-                </button>
+
             `;
             resultadoBusca.appendChild(divInativarTodas);
         }
@@ -798,7 +792,7 @@ function confirmarInativacao() {
 
 
 
-// ========== FUNÇÕES DE INATIVAÇÃO PARA MÚLTIPLAS BASES ==========
+//  FUNÇÕES DE INATIVAÇÃO PARA MÚLTIPLAS BASES 
 function inativarBaseIndividual(base, usuario) {
     if (!confirm(`Tem certeza que deseja inativar o usuário ${usuario} na base ${base}?`)) {
         return;
@@ -1005,6 +999,10 @@ function ativarBaseIndividual(base, usuario) {
     })
     .finally(() => fecharModal());
 }
+
+
+
+
 function confirmarAtivacao() {
     const base = document.getElementById("base_inativacao")?.value || '';
     const usuario = document.getElementById("usuario_inativar")?.value.trim().toUpperCase() || '';
@@ -1020,89 +1018,230 @@ function confirmarAtivacao() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ base, usuario })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        if (data.mensagem) {
-            mostrarToast("success", `Usuário ${usuario} ativado com sucesso na base ${base}!`);
+        const resultadoDiv = document.getElementById("resultado-inativacao");
+        if (!resultadoDiv) return;
+        
+        resultadoDiv.innerHTML = '';
+        
+        if (data.erro) {
+            resultadoDiv.innerHTML = `
+                <div class="resultado-item erro">
+                    <i class="fas fa-times-circle"></i> ${data.erro}
+                </div>
+            `;
+        } else {
+            resultadoDiv.innerHTML = `
+                <div class="resultado-item sucesso">
+                    <i class="fas fa-check-circle"></i> ${data.mensagem}
+                </div>
+            `;
+            // Atualiza o status para ativo
+            const infoStatus = document.getElementById("info-status");
+            if (infoStatus) {
+                infoStatus.innerHTML = '<span class="status-ativo">ATIVO</span>';
+            }
+            const confirmarBtn = document.getElementById("confirmar-ativacao");
+            if (confirmarBtn) confirmarBtn.style.display = "none";
             
-            // Atualiza status no card
-            const statusElement = document.getElementById(`info-status-${base}`);
-            if (statusElement) statusElement.innerHTML = '<span class="status-ativo">ATIVO</span>';
+            // Mostra o botão de inativação
+            const inativarBtn = document.getElementById("confirmar-inativacao");
+            if (inativarBtn) inativarBtn.style.display = "block";
+        }
+        resultadoDiv.style.display = "block";
+        fecharModal();
+    })
+    .catch(err => {
+        console.error("Erro:", err);
+        fecharModal();
+    });
+}
 
-            // Troca botão de ativar para inativar
-            const button = document.querySelector(`button[onclick="confirmarAtivacao()"]`);
+
+
+function ativarBaseIndividual(base, usuario) {
+    if (!confirm(`Tem certeza que deseja ativar o usuário ${usuario} na base ${base}?`)) {
+        return;
+    }
+
+    mostrarModal(`Ativando usuário na base ${base}...`);
+
+    fetch("/ativar_usuario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base, usuario })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const resultadoDiv = document.getElementById("resultado-inativacao");
+        if (!resultadoDiv) return;
+        
+        resultadoDiv.innerHTML = '';
+        
+        if (data.erro) {
+            resultadoDiv.innerHTML = `
+                <div class="resultado-item erro">
+                    <i class="fas fa-times-circle"></i> Base ${base}: ${data.erro}
+                </div>
+            `;
+        } else {
+            resultadoDiv.innerHTML = `
+                <div class="resultado-item sucesso">
+                    <i class="fas fa-check-circle"></i> Base ${base}: ${data.mensagem}
+                </div>
+            `;
+            
+            // Atualizar a interface - marcar como ativo
+            const statusElement = document.getElementById(`info-status-${base}`);
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="status-ativo">ATIVO</span>';
+            }
+            
+            // Substituir o botão de ativação individual pelo de inativação
+            const button = document.querySelector(`button[onclick="ativarBaseIndividual('${base}', '${usuario}')"]`);
             if (button) {
                 button.outerHTML = `
-                    <button class="btn-inativar" onclick="confirmarInativacao()">
+                    <button class="btn-inativar" onclick="inativarBaseIndividual('${base}', '${usuario}')">
                         <i class="fas fa-user-slash"></i> Inativar nesta base
                     </button>
                 `;
             }
-        } else if (data.erro) {
-            mostrarToast("error", `Erro na base ${base}: ${data.erro}`);
         }
+        resultadoDiv.style.display = "block";
+        fecharModal();
     })
     .catch(err => {
-        mostrarToast("error", `Erro ao ativar usuário na base ${base}: ${err.message}`);
-        console.error(err);
-    })
-    .finally(() => fecharModal());
+        console.error("Erro:", err);
+        const resultadoDiv = document.getElementById("resultado-inativacao");
+        if (resultadoDiv) {
+            resultadoDiv.innerHTML = `
+                <div class="resultado-item erro">
+                    <i class="fas fa-times-circle"></i> Erro: ${err.message}
+                </div>
+            `;
+            resultadoDiv.style.display = "block";
+        }
+        fecharModal();
+    });
 }
-
 //adicionei a funcionalidade acima 08/10/2025
 
 function initInativacao() {
     const btn = document.getElementById("buscar-usuario-inativacao");
     if (btn) btn.addEventListener("click", buscarUsuario);
 }
-document.addEventListener("DOMContentLoaded", initInativacao);
 async function ativarEmTodasBases() {
-    // Pega as bases selecionadas
     const basesSelecionadas = Array.from(document.querySelectorAll("input[name='base-inativacao']:checked"))
                                    .map(cb => cb.value);
     const usuario = document.getElementById("usuario_inativar")?.value.trim().toUpperCase() || '';
 
-    if (!usuario) {
-        alert("Digite o usuário para ativar.");
+    // Filtrar apenas bases que estão inativas (baseado na interface)
+    const basesInativas = basesSelecionadas.filter(base => {
+        const statusElement = document.getElementById(`info-status-${base}`);
+        return statusElement && statusElement.textContent.includes('INATIVO');
+    });
+
+    if (basesInativas.length === 0) {
+        alert('Não há usuários inativos para ativar nas bases selecionadas.');
         return;
     }
 
-    if (basesSelecionadas.length === 0) {
-        alert("Selecione pelo menos uma base.");
+    if (!confirm(`Tem certeza que deseja ativar o usuário ${usuario} em ${basesInativas.length} bases?\n\nBases: ${basesInativas.join(', ')}`)) {
         return;
     }
 
-    const resultadoContainer = document.getElementById("resultado-inativacao");
-    resultadoContainer.innerHTML = "Processando ativação...";
+    mostrarModal(`Ativando usuário em ${basesInativas.length} bases...`);
 
-    // Executa a ativação em todas as bases selecionadas
-    const promises = basesSelecionadas.map(base => {
+    // Criar promises para ativar em todas as bases simultaneamente
+    const promises = basesInativas.map(base => {
         return fetch("/ativar_usuario", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ base, usuario })
         })
-        .then(resp => resp.json())
-        .then(data => ({ base, data }))
-        .catch(err => ({ base, data: { status: "erro", mensagem: err.message } }));
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            return {
+                base: base,
+                data: data,
+                error: null
+            };
+        })
+        .catch(error => {
+            return {
+                base: base,
+                data: null,
+                error: error.message
+            };
+        });
     });
 
-    const results = await Promise.all(promises);
-
-    // Exibe o resultado
-    resultadoContainer.innerHTML = results.map(r => {
-        const cor = r.data.status === "sucesso" ? "green" : "red";
-        return `<p><strong>${r.base}:</strong> <span style="color:${cor}">${r.data.mensagem}</span></p>`;
-    }).join("");
+    Promise.all(promises)
+    .then(results => {
+        const resultadoDiv = document.getElementById("resultado-inativacao");
+        if (!resultadoDiv) return;
+        
+        resultadoDiv.innerHTML = '<h3>Resultado da Ativação em Múltiplas Bases:</h3>';
+        
+        results.forEach(result => {
+            const div = document.createElement("div");
+            div.classList.add("resultado-item");
+            
+            if (result.error || (result.data && result.data.erro)) {
+                div.classList.add("erro");
+                div.innerHTML = `<i class="fas fa-times-circle"></i> <strong>${result.base}:</strong> ${result.error || result.data.erro}`;
+            } else {
+                div.classList.add("sucesso");
+                div.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${result.base}:</strong> ${result.data.mensagem}`;
+                
+                // Atualizar a interface
+                const statusElement = document.getElementById(`info-status-${result.base}`);
+                if (statusElement) {
+                    statusElement.innerHTML = '<span class="status-ativo">ATIVO</span>';
+                }
+                
+                // Substituir botão de ativar pelo botão de inativar
+                const button = document.querySelector(`button[onclick="ativarBaseIndividual('${result.base}', '${usuario}')"]`);
+                if (button) {
+                    button.outerHTML = `
+                        <button class="btn-inativar" onclick="inativarBaseIndividual('${result.base}', '${usuario}')">
+                            <i class="fas fa-user-slash"></i> Inativar nesta base
+                        </button>
+                    `;
+                }
+            }
+            
+            resultadoDiv.appendChild(div);
+        });
+        
+        resultadoDiv.style.display = "block";
+        fecharModal();
+    })
+    .catch(err => {
+        console.error("Erro:", err);
+        fecharModal();
+    });
 }
 
 
 
-
-
-
-
-// ========== FUNÇÕES DE VALIDAÇÃO ==========
+//  FUNÇÕES DE VALIDAÇÃO 
 function validarFormularioUsuario() {
     let valido = true;
     
@@ -1222,7 +1361,7 @@ function validarFormularioInativacao() {
 
 
 
-// ========== FUNÇÕES AUXILIARES ==========
+// FUNÇÕES AUXILIARES 
 function limparErros(tipo) {
     try {
         const errorElements = document.querySelectorAll('.error-text');
@@ -1306,7 +1445,7 @@ function getIconForStatus(status) {
 
 
 
-// ========== FUNÇÕES PARA ALTERAR PERFIL ==========
+// FUNÇÕES PARA ALTERAR PERFIL 
 
 function inicializarAlterarPerfil() {
     console.log('🚀 Inicializando Alterar Perfil...');
@@ -1334,6 +1473,9 @@ function inicializarAlterarPerfil() {
     }
 }
 
+
+
+
 function preencherBasesDisponiveisAlteracaoPerfil() {
     const container = document.getElementById('bases-container-alteracao-perfil');
     if (!container) return;
@@ -1355,6 +1497,12 @@ function preencherBasesDisponiveisAlteracaoPerfil() {
         container.appendChild(checkboxItem);
     });
 }
+
+
+
+
+
+
 
 function atualizarContadorBaseAlteracaoPerfil() {
     const checkboxesMarcados = document.querySelectorAll('input[name="bases_alteracao_perfil"]:checked');
@@ -1538,6 +1686,9 @@ async function confirmarAlteracaoPerfil() {
     }
 }
 
+
+
+
 function exibirResultadoConsultaAlteracao(data) {
     console.log('📊 Exibindo resultado da consulta:', data);
     
@@ -1588,6 +1739,10 @@ function exibirResultadoConsultaAlteracao(data) {
         }
     }
 }
+
+
+
+
 
 function mostrarResultadoPerfil(mensagem, tipo) {
     console.log(`📊 Resultado (${tipo}): ${mensagem}`);
@@ -1665,7 +1820,26 @@ function fecharLoading() {
     const modal = document.getElementById('loadingModal');
     modal.style.display = 'none';
 }
+const openTeamModal = document.getElementById('openTeamModal');
+const teamModal = document.getElementById('teamModal');
+const closeTeamModal = document.getElementById('closeTeamModal');
 
+// abrir modal
+openTeamModal.addEventListener('click', () => {
+    teamModal.style.display = 'flex';
+});
+
+// fechar modal pelo botão
+closeTeamModal.addEventListener('click', () => {
+    teamModal.style.display = 'none';
+});
+
+// fechar modal clicando fora
+window.addEventListener('click', (event) => {
+    if(event.target === teamModal){
+        teamModal.style.display = 'none';
+    }
+});
 
 
 
@@ -1856,3 +2030,21 @@ function fazerVarreduraGlobal(usuarioDestino) {
     });
 }
 
+
+        // Funções do modal de escolha de perfil
+        function abrirModalEscolha() {
+            document.getElementById("modalEscolhaPerfil").style.display = "flex";
+        }
+        function fecharModalEscolha() {
+            document.getElementById("modalEscolhaPerfil").style.display = "none";
+        }
+        function selecionarAcaoPerfil(acao) {
+            fecharModalEscolha();
+            document.getElementById("replicar-perfil-section").style.display = "none";
+            document.getElementById("alterar-perfil-section").style.display = "none";
+            if (acao === 'replicar') {
+                document.getElementById("replicar-perfil-section").style.display = "block";
+            } else if (acao === 'alterar') {
+                document.getElementById("alterar-perfil-section").style.display = "block";
+            }
+        }

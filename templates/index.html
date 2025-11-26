@@ -6,15 +6,20 @@
     <title>AccessReplicator - Usuários e Perfis</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+    <a href="/logout" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Sair
+    </a>
 <body>
-    <!-- Sistema de Notificações -->
+    <!--  Notificações -->
     <div id="sistemaNotificacoes" class="sistema-notificacoes"></div>
 
     <div class="header">
-        <h1><i class="fas fa-copy"></i> AccessReplicator</h1>
-        <p>Sistema de criação de usuários e perfis</p>
+        <h1 class="animate__animated animate__fadeInDown">Access Replicator 4.0</h1>
     </div>
 
     <!-- Abas -->
@@ -22,9 +27,11 @@
         <div class="tab active" data-target="usuario-form">Usuário</div>
         <div class="tab" data-target="perfil-form">Perfil</div>
         <div class="tab" data-target="inativar-form">Inativar Usuário</div>
+        
     </div>
+    
 
-    <!-- ================= FORMULÁRIO DE CRIAÇÃO DE USUÁRIO ================= -->
+    <!-- FORMULÁRIO DE CRIAÇÃO DE USUÁRIO  -->
     <div class="form-container active" id="usuario-form">
         <h2><i class="fas fa-user-plus"></i> Criação de Usuário</h2>
         <div class="form-group">
@@ -113,7 +120,7 @@
         <div class="resultado" id="resultado-usuario"></div>
     </div>
 
-    <!-- ================= FORMULÁRIO DE CRIAÇÃO DE PERFIL ================= -->
+    <!--  FORMULÁRIO DE CRIAÇÃO DE PERFIL  -->
     <div class="form-container" id="perfil-form">
         <h2><i class="fas fa-id-card"></i> Criação de Perfil</h2>
         <div class="form-section">
@@ -123,7 +130,7 @@
                     <label for="base_origem" class="required">Base Origem</label>
                     <select id="base_origem" name="base_origem" class="base-select">
                         <option value="">Selecionar Base Origem</option>
-                        <!-- Opções preenchidas via JavaScript -->
+                        <!-- Opções preenchidas em JavaScript -->
                     </select>
                     <div class="error-text" id="base_origem_error"></div>
                 </div>
@@ -163,13 +170,13 @@
             </button>
         </div>
 
-        <!-- ================= ALTERAÇÃO DE PERFIL ================= -->
+        <!-- ALTERAÇÃO DE PERFIL  -->
         <div class="form-section" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e9ecef;">
             <h3><i class="fas fa-exchange-alt"></i> Alterar Perfil de Usuário</h3>
             
             <div class="form-group">
                 <label class="required">Bases</label>
-                <div class="contador-bases" id="contador-base-alteracao">Selecione uma base para alteração</div>
+                <div class="contador-bases" id="contador-base-alteracao">Selecione apenas uma base para alteração</div>
                 <div class="multiselect">
                     <div class="selectBox" onclick="toggleCheckboxes('alteracao-perfil')">
                         <span id="selectedBaseTextAlteracao">Filtro de bases</span>
@@ -305,7 +312,7 @@
 </div>
 
 
-    <!-- ================= MODAL DE LOADING ================= -->
+    <!-- MODAL DE LOADING -->
     <div id="loadingModal" class="modal">
         <div class="modal-content">
             <h3><i class="fas fa-sync fa-spin"></i> Processamento em andamento</h3>
@@ -316,7 +323,7 @@
         </div>
     </div>
 
-    <!-- ================= LOGS EM TEMPO REAL ================= -->
+    <!-- LOGS EM TEMPO REAL -->
     <div id="log-container" style="position: fixed; top: 20px; right: 20px; width: 350px; max-height: 500px; overflow-y: auto; background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10000; display: none;">
         <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: between; align-items: center;">
             <h4 style="margin: 0;">Log do Sistema</h4>
@@ -324,10 +331,46 @@
         </div>
         <div id="logs-content" style="padding: 10px;"></div>
     </div>
+<footer class="app-footer show">
+    <div class="footer-left">
+        <span>
+            Desenvolvido por 
+            <span id="openTeamModal" class="autor">
+                Atendimento - Sistemas <i class="fas fa-user-astronaut"></i>
+            </span>
+        </span>
+    </div>
 
-    <!-- ================= TOASTS ================= -->
+
+</footer>
+
+
+<!-- MODAL DA EQUIPE -->
+<div id="teamModal" class="team-modal">
+    <div class="team-modal-content">
+        <h3>Desenvolvimento 🚀</h3>
+        <ul>
+            <li>Mariana Borges Ramos</li>
+            <li>Wendy Laura Arivilca</li>
+            <li>Felipe Franscico </li>
+            <li>Gabriella dos Reis</li>
+            <li>André Bellato</li>
+        </ul>
+        <button id="closeTeamModal" class="replicar-btn">
+            <i class="fas fa-times"></i> Fechar
+        </button>
+    </div>
+</div>
+
+    <!--  TOASTS  -->
     <div id="toast-container" style="position: fixed; top: 50px; right: 50px; z-index: 9999;"></div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+
+
+
+
+
 </body>
 </html>

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from db import (
     InativacaoService,  #  classe que contém ativar_usuario e inativar_usuario
     replicar_usuario, 
@@ -17,11 +17,71 @@ from dotenv import load_dotenv
 # Carrega variáveis do .env
 load_dotenv()
 
-app = Flask(__name__)
 
-@app.route("/")
+
+
+
+app = Flask(__name__)
+app.secret_key = 'chave_super_segura_123'
+
+
+# Credenciais - em produção, use banco de dados ou variáveis de ambiente
+ADMIN_USER =  'admin'
+ADMIN_PASS =  '1234'
+
+@app.route('/')
+def home():
+    if 'usuario' in session:
+        return redirect(url_for('index'))
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'usuario' in session:
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        if not username or not password:
+            flash('Por favor, preencha todos os campos', 'danger')
+            return render_template('login.html')
+        
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            session['usuario'] = username
+            session.permanent = True
+            flash(f'Bem-vindo, {username}!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Usuário ou senha incorretos', 'danger')
+            return render_template('login.html')
+    
+    return render_template('login.html')
+
+@app.route('/index')
 def index():
-    return render_template("index.html", bases=list(BASES.keys()))
+    """Página principal - APENAS para usuários autenticados"""
+    if 'usuario' not in session:
+        flash('Por favor, faça login para acessar o sistema', 'warning')
+        return redirect(url_for('login'))
+    return render_template('index.html', usuario=session['usuario'])
+
+@app.route('/logout')
+def logout():
+    """Logout do usuário"""
+    usuario = session.pop('usuario', None)
+    if usuario:
+        flash('Logout realizado com sucesso.', 'info')
+    return redirect(url_for('login'))
+
+@app.after_request
+def after_request(response):
+    if 'usuario' in session:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
 
 # ROTAS DE USUÁRIO
 @app.route("/criar_usuario", methods=["POST"])
