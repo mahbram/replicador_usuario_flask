@@ -8,11 +8,11 @@ HTML / CSS (Jinja2)
 Virtualenv
 Estrutura do Projeto
 replicador_usuario_flask/
-├── app.py            # Aplicação principal
-├── templates/        # Páginas HTML
-├── static/           # CSS e arquivos estáticos
-├── requirements.txt  # Dependências
-└── README.md         # Documentação
+-app.py            # Aplicação principal
+-templates/        # Páginas HTML
+-static/           # CSS e arquivos estáticos
+-requirements.txt  # Dependências
+-README.md         # Documentação
 
 
 Como executar
