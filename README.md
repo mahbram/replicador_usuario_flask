@@ -34,5 +34,3 @@ DB_PASSWORD=xxx
 SECRET_KEY=alguma_chave_secreta
 5. Execute o projeto
 python app.py
-
-
